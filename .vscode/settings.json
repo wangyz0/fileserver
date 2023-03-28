@@ -1,0 +1,7 @@
+{
+    "workbench.statusBar.visible": true,
+    "workbench.tips.enabled": true,
+    "workbench.sideBar.location": "left",
+    "workbench.iconTheme": "vs-seti",
+    "search.actionsPosition": "auto"
+}
