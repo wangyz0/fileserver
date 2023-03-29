@@ -10,14 +10,21 @@ func main() {
 	// 处理static目录下的静态文件路径
 	http.Handle("/accets/", http.StripPrefix("/accets/", http.FileServer(http.Dir("static/accets"))))
 
-	// 注册 upload 页面路由处理函数
+	//  uploads 上传页面路由处理函数
 	http.HandleFunc("/file/upload", handler.UploadHandler)
-	http.HandleFunc("/login", handler.Login)
-	http.HandleFunc("/sign", handler.Sign)
+	// login登录页面上传
+	http.HandleFunc("/login", handler.LoginHandler)
+	// sign注册页面
+	http.HandleFunc("/sign", handler.SignupHandler)
+	// 查询文件接口
+	http.HandleFunc("/query", handler.GetFileMetaHandler)
+	//文件下载接口
+	http.HandleFunc("/download", handler.DownloadHandler)
 
 	// 启动服务
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("fail to start server")
 	}
+
 }

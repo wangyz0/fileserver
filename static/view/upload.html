@@ -109,63 +109,76 @@
       </div>
     </header>
   </div>
-    <!--文件上传部分-->
-  <div class="file-input">
-    <label for="file-input">选择文件</label> <!--显示文本-->
-    <input type="file" id="file-input" name="file" onchange="onSelectFile(event)"> <!--文件上传输入框-->
-    <input type="text" value="请选择文件" readonly> <!--只读文本框，显示选中的文件名-->
-    <button type="button1" id="delete-button" style="display:none;">删除</button> <!--按钮，用于删除和上传文件，初始隐藏-->
-    <button type="button2" id="upload-button" style="display:none;">上传</button>
-  </div>
+<!-- 文件上传部分 -->
+<div class="file-input">
+  <label for="file-input">选择文件</label>
+  <input type="file" id="file-input" name="file" onchange="onSelectFile(event)">
+  <input type="text" value="请选择文件" readonly>
+  <button type="button1" id="delete-button" style="display:none;">删除</button>
+  <button type="button2" id="upload-button" style="display:none;">上传</button>
+</div>
 
-  <!--JavaScript脚本部分-->
-  <script>
-    //当用户选择文件时触发的函数
-    function onSelectFile(event) {
-      const file = event.target.files[0];
+  <!-- JavaScript脚本部分 -->
+<script>
+  let file = null; //当前选择的文件
 
-      if (!file) { //如果未选择文件，则函数结束
-        return;
+  function onSelectFile(event) {
+    const selectedFileElement = document.querySelector('.file-input');
+    const deleteButton = document.getElementById('delete-button');
+    const uploadButton = document.getElementById('upload-button');
+
+    file = event.target.files[0]; //选中的文件赋值给全局变量file
+
+    if (!file) { //如果未选择文件，则函数结束
+      return;
+    }
+
+    //更新页面内容
+    selectedFileElement.querySelectorAll('button').forEach(button => button.style.display = 'block'); //显示“删除”和“上传”按钮
+    selectedFileElement.querySelector('input[type=text]').value = file.name;
+
+    deleteButton.addEventListener('click', onDeleteFile); //为“删除”按钮添加事件监听器
+    uploadButton.addEventListener('click', onUploadFiles); //为“上传”按钮添加事件监听器
+  }
+
+  function onDeleteFile() {
+    file = null; //将已选择的文件设为null
+    resetForm(); //重置表单
+  }
+
+  function onUploadFiles() {
+    const filesToUpload = file ? [file] : []; //只上传未被删除的文件
+
+    if (filesToUpload.length === 0) { //如果未选择要上传的文件，则函数结束
+      return;
+    }
+
+    const xhr = new XMLHttpRequest(); //创建XMLHttpRequest对象，用于向服务器发送请求
+    xhr.open('POST', '/file/upload'); //设置请求类型和URL
+    xhr.onreadystatechange = function() { //当状态发生变化时执行的回调函数
+      if (xhr.readyState === 4 && xhr.status === 200) { //如果请求成功
+        alert('上传成功'); //弹窗提示用户上传成功
+        resetForm(); //重置表单（即将已选择文件、按钮以及只读文本框重置为初始状态）
       }
+    };
+    const formData = new FormData(); //创建FormData对象，用于存储要上传的文件
+    filesToUpload.forEach(f => formData.append('file', f)); //将选中的文件添加到FormData对象中
+    xhr.send(formData); //发送请求
+  }
 
-      //根据选择的文件更新页面内容
-      const selectedFileElement = document.querySelector('.file-input');
-      selectedFileElement.querySelectorAll('button').forEach(button => button.style.display = 'block'); //显示“删除”和“上传”按钮
-      selectedFileElement.querySelector('input[type=text]').value = file.name; //将只读文本框中显示的文字更新为所选文件的名称
-      
-      //实现“删除”按钮的功能
-      document.getElementById('delete-button').addEventListener('click', () => {
-        document.getElementById('file-input').value = ''; //重置file input的值，即清空已选择的文件
-        document.getElementById('delete-button').style.display = 'none'; //隐藏“删除”按钮
-        document.getElementById('upload-button').style.display = 'none'; //隐藏“上传”按钮
-        selectedFileElement.querySelector('input[type=text]').value = '请选择文件'; //将只读文本框中的文字重置为初始值
-      });
+  function resetForm() {
+    const selectedFileElement = document.querySelector('.file-input');
+    const deleteButton = document.getElementById('delete-button');
+    const uploadButton = document.getElementById('upload-button');
 
-      //实现“上传”按钮的功能
-      document.getElementById('upload-button').addEventListener('click', () => {
-        const xhr = new XMLHttpRequest(); //创建XMLHttpRequest对象，用于向服务器发送请求
-        xhr.open('POST', '/file/upload'); //设置请求类型和URL
-        xhr.onreadystatechange = function() { //当状态发生变化时执行的回调函数
-          if (xhr.readyState === 4 && xhr.status === 200) { //如果请求成功
-            alert('上传成功'); //弹窗提示用户上传成功
-            resetForm(); //重置表单（即将已选择文件、按钮以及只读文本框重置为初始状态）
-          }
-        };
-        const formData = new FormData(); //创建FormData对象，用于存储要上传的文件
-        formData.append('file', file); //将选中的文件添加到FormData对象中
-        xhr.send(formData); //发送请求
-      });
-    }
-
-    //重置表单（即将已选择文件、按钮以及只读文本框重置为初始状态）
-    function resetForm() {
-      const selectedFileElement = document.querySelector('.file-input');
-      document.getElementById('file-input').value = '';
-      document.getElementById('delete-button').style.display = 'none';
-      document.getElementById('upload-button').style.display = 'none';
-      selectedFileElement.querySelector('input[type=text]').value = '请选择文件';
-    }
-  </script>
+    deleteButton.removeEventListener('click', onDeleteFile); //移除“删除”按钮的事件监听器
+    uploadButton.removeEventListener('click', onUploadFiles); //移除“上传”按钮的事件监听器
+    document.getElementById('file-input').value = '';
+    deleteButton.style.display = 'none';
+    uploadButton.style.display = 'none';
+    selectedFileElement.querySelector('input[type=text]').value = '请选择文件';
+  }
+</script>
 </body>
 </html>
 

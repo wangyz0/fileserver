@@ -80,16 +80,16 @@
     
         
     <main class="form-signin w-100 m-auto" >
-      <form style="width: 30%; margin: 0 auto;">
+      <form method="POST" action="/login" style="width: 30%; margin: 0 auto;">
         <img class="mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
         <h1 class="h3 mb-3 fw-normal">登录网盘</h1>
     
         <div class="form-floating">
-          <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+          <input type="text" class="form-control" name="username" id="floatingInput" placeholder="name@example.com">
           <label for="floatingInput">用户名</label>
         </div>
         <div class="form-floating">
-          <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+          <input type="password" class="form-control" name="password" id="floatingPassword" placeholder="Password">
           <label for="floatingPassword">密码</label>
         </div>
     
