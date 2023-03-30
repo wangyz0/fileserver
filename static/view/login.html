@@ -62,44 +62,62 @@
             </li>
           </ul>
         </div>
-    
-        
-    <main class="form-signin w-100 m-auto" >
-      <form method="POST" action="/login" style="width: 30%; margin: 0 auto;">
-        <img class="mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
-        <h1 class="h3 mb-3 fw-normal">登录网盘</h1>
-    
-        <div class="form-floating">
-          <input type="text" class="form-control" name="username" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">用户名</label>
-        </div>
-        <div class="form-floating">
-          <input type="password" class="form-control" name="password" id="floatingPassword" placeholder="Password">
-          <label for="floatingPassword">密码</label>
-        </div>
-    
-        <div class="checkbox mb-3">
-          <label>
-            <input type="checkbox" value="remember-me"> Remember me
-          </label>
-        </div>
-        <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-        <p class="mt-5 mb-3 text-body-secondary">© 2023</p>
-      </form>
-    </main>
-    <script>
-   let form = document.querySelector('form')
-   let xhr = new XMLHttpRequest();
-   let url = "url";  // 替换成请求链接
-   xhr.open("post", url, true);
-   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-   xhr.onreadystatechange = function() {
-       if (xhr.readyState === 4 && xhr.status === 200) {
-           let data = JSON.parse(xhr.responseText).Data;   // 获取返回的数据，并将 data 属性中的数据解析出来
-           window.location.href = data.Location + "?username=" + data.Username + "&token=" + data.Token;  // js跳转到下一个页面
-       }
-   }
-   xhr.send(new FormData(form));  // 发送数据
-    </script>
+<main class="form-signin w-100 m-auto">
+  <form method="POST" action="/login" style="width: 30%; margin: 0 auto;">
+    <img class="mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+    <h1 class="h3 mb-3 fw-normal">登录网盘</h1>
+
+    <div class="form-floating">
+      <input type="text" class="form-control" name="username" id="username" placeholder="请输入用户名">
+      <label for="username">用户名</label>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" name="password" id="password" placeholder="请输入密码">
+      <label for="password">密码</label>
+    </div>
+
+    <div class="checkbox mb-3">
+      <label>
+        <input type="checkbox" value="remember-me"> 记住我
+      </label>
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" type="submit" id="login-btn">登录</button>
+    <p class="mt-5 mb-3 text-body-secondary">© 2023</p>
+  </form>
+</main>
+
+<script>
+  let loginBtn = document.querySelector("#login-btn");
+  let usernameInput = document.querySelector("#username");
+  let passwordInput = document.querySelector("#password");
+
+  loginBtn.addEventListener("click", function (event) {
+    event.preventDefault(); // 阻止表单默认行为
+
+    // 构造 POST 请求参数
+    let xhr = new XMLHttpRequest();
+    let url = "/login"; // 实际请求链接
+    let data = "username=" + usernameInput.value + "&password=" + passwordInput.value;
+    xhr.open("post", url, true);
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        let data = JSON.parse(xhr.responseText).data;
+        let location = "";
+
+        if (data.username && data.token) {
+          location = "/home?username=" + data.username + "&token=" + data.token;
+          window.location.href = location; // 跳转到下一个页面
+        } else {
+          console.log("Error: username or token is empty");
+        }
+      }
+    }
+
+    xhr.send(data);
+  })
+</script>
+
 </body>
 </html>

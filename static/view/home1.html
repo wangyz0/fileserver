@@ -107,13 +107,12 @@
     </style>
   </head>
   <body>
-
     <div id="container">
       <div id="sidebar">
         <div id="logo">GoPan</div>
-        <div id="username">用户名：John Doe</div>
-        <div id="regdate">注册日期：2022年1月1日</div>
-        <div id="capacity">已用容量：20GB / 100GB</div>
+        <div id="username">{{.Username}}</div>
+        <div id="regdate">注册日期：{{.RegDate}}</div>
+        <div id="capacity">已用容量：{{.Capacity}}</div>
       </div>
       <div id="main">
         <div class="container">
@@ -149,18 +148,6 @@
             <td>file01.txt</td>
             <td>2022-02-01</td>
             <td>10MB</td>
-            <td><button class="download-btn">下载</button><button class="delete-btn">删除</button></td>
-          </tr>
-          <tr>
-            <td>file02.doc</td>
-            <td>2022-02-14</td>
-            <td>22MB</td>
-            <td><button class="download-btn">下载</button><button class="delete-btn">删除</button></td>
-          </tr>
-          <tr>
-            <td>file03.jpg</td>
-            <td>2022-02-28</td>
-            <td>5MB</td>
             <td><button class="download-btn">下载</button><button class="delete-btn">删除</button></td>
           </tr>
         </table>

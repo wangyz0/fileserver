@@ -7,7 +7,7 @@ import (
 
 // ResMsg;http响应通用结构
 type RespMsg struct {
-	Code int         `json:"code"`
+	Code int
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }

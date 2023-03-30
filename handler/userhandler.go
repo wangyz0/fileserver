@@ -4,8 +4,12 @@ import (
 	"fileserver/db"
 	"fileserver/util"
 	"fmt"
+	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	// "strings"
 	"time"
 )
 
@@ -66,20 +70,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if b == false {
 			w.Write([]byte("写入token失败 登录失败"))
 		}
+		fmt.Println("开始跳转")
 		//登录成功后定向到首页
 		resp := util.RespMsg{
 			Code: 0,
 			Msg:  "OK",
 			Data: struct {
-				Location string
-				Username string
-				Token    string
+				Username string `json:"username"`
+				Token    string `json:"token"`
 			}{
-				Location: "http://" + r.Host + "/static/view/home1.html",
 				Username: username,
 				Token:    token,
 			},
 		}
+		// fmt.Printf("Location: http://%s/static/view/home1.html", r.Host)
 		w.Write(resp.JSONBytes())
 	}
 }
@@ -126,14 +130,43 @@ func IsTokenVaild(token string) bool {
 }
 
 // 用户首页
+// 声明一个 struct 作为 HomePage 模板中要用到的数据类型
+type HomePageData struct {
+	Username     string
+	RegDate      string
+	CapacityUsed string
+	CapacityMax  string
+}
+
 func HomeHandeler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		data, err := ioutil.ReadFile("./static/view/home1.html")
+		fmt.Println("获取username")
+		username := r.URL.Query().Get("username")
+		fmt.Printf("username: %v\n", username)
+		user, err := db.GetUserInfo(username)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("err: %v\n", err)
+		}
+		data := map[string]string{
+			"Username": username,
+			"RegDate":  user.SignupAt[:10],
+			"Capacity": "20GB / 100GB",
+		}
+
+		t, err := template.ParseFiles("./static/view/home1.html")
+		if err != nil {
+			log.Printf("Parse home page failed: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		w.Write(data)
+
+		if err := t.Execute(w, data); err != nil {
+			log.Printf("Render home page failed: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		return
 	}
+
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }

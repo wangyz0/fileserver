@@ -23,7 +23,7 @@ func main() {
 	// 用户信息查询
 	http.HandleFunc("/user/info", handler.UserInfoHandler)
 	// // 主页
-	// http.HandleFunc("/home", handler.HomeHandeler)
+	http.HandleFunc("/home", handler.HomeHandeler)
 
 	// 启动服务
 	err := http.ListenAndServe(":8080", nil)

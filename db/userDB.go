@@ -93,7 +93,7 @@ type User struct {
 func GetUserInfo(username string) (User, error) {
 	user := User{}
 	stmt, err := mysql.DBConn().Prepare(
-		"select user_name,signup_at from tbl_user where user_name=?limit=1")
+		"SELECT user_name, signup_at FROM tbl_user WHERE user_name=? LIMIT 1")
 	if err != nil {
 		fmt.Println(err)
 		return user, err
