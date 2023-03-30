@@ -40,3 +40,70 @@ func UserLogin(username string, password string) bool {
 	return false
 
 }
+
+// 更新用户token
+func UpdateToken(username string, token string) bool {
+	// 连接到数据库，根据用户名创建用户或更新用户 Token。
+	stmt, err := mysql.DBConn().Prepare(`
+		insert into tbl_user_token (user_name, user_token)
+		values(?, ?)
+		on duplicate key update user_token = values(user_token)
+	`)
+	if err != nil { // 如果有错误，则打印出来，并返回 false。
+		fmt.Printf("err: %v\n", err)
+		return false
+	}
+	defer stmt.Close()                      // 最后关闭 SQL 语句的连接。
+	res, err := stmt.Exec(username, token)  // 执行 SQL 语句，如果有错误，则打印出来，并返回 false。
+	rowsAffected, err := res.RowsAffected() // 获取受影响的行数
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return false
+	}
+	if rowsAffected == 0 { // 如果没有受影响的行数，说明没有更新数据，就需要创建新记录
+		stmt, err = mysql.DBConn().Prepare(`
+			insert into tbl_user_token (user_name,user_token)
+			values (?,?)
+		`)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+			return false
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec(username, token)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+			return false
+		}
+	}
+
+	return true // 最后返回 true
+}
+
+// 查询用户信息
+type User struct {
+	Username     string
+	Email        string
+	Phone        string
+	SignupAt     string
+	LastActiveAt string
+	Status       int
+}
+
+func GetUserInfo(username string) (User, error) {
+	user := User{}
+	stmt, err := mysql.DBConn().Prepare(
+		"select user_name,signup_at from tbl_user where user_name=?limit=1")
+	if err != nil {
+		fmt.Println(err)
+		return user, err
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(username).Scan(&user.Username, &user.SignupAt)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return user, err
+	}
+	return user, nil
+
+}

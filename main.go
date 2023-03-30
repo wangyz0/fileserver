@@ -20,6 +20,10 @@ func main() {
 	http.HandleFunc("/query", handler.GetFileMetaHandler)
 	//文件下载接口
 	http.HandleFunc("/download", handler.DownloadHandler)
+	// 用户信息查询
+	http.HandleFunc("/user/info", handler.UserInfoHandler)
+	// // 主页
+	// http.HandleFunc("/home", handler.HomeHandeler)
 
 	// 启动服务
 	err := http.ListenAndServe(":8080", nil)

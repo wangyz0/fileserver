@@ -1,0 +1,59 @@
+<html>
+<head>
+  <!-- 原来的双引号不一致，导致script标签无法正常引入库 -->
+  <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+  <!-- 由于此处有多行字符串需要拼接，统一使用反斜杠进行换行，可以增加代码可读性 -->
+  <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg320mUcww7on3RYdg4Va+Pm\
+    <！---- 可选的 Bootstrap 主题文件 ---->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nDOJutInGasICJuC7uwjduW9SVrLvRYooPp2bWY\
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9m(" crossorigin="anonymous"></script>
+    <script lang="javascript">
+    </script>
+</head>
+<body style="width:100%;height:100%">
+  <div style="width:100%;height:100%;margin:0 0 10px 0;text-align: center;">
+    <div style="font-size:20px;font-weight:bold;margin:0;background: powderblue;height:32px;"> 文件云盘首页</div>
+    <table style="height:100%;width:100%;text-align: left;border-width: 2px; border-">
+      <!-- 由于此处的样式和布局都存在问题，重构了HTML代码 --> 
+      <tr style="margin-bottom: 20px;">
+        <td style="width:20%;height: 100%;background: lightsteelblue;">
+          <div style="text-align: top;height:20%;margin: 10px 0 0 10px;">
+            <img style="width:80px;height:80px;" src="/static/img/avatar.jpeg"> 用户名：<span id="username" style="color:green"></span><br> 注册时间：<span id="regtime" style="color:green"></span>
+          </div>
+          <!-- 这里不需要高度百分比 -->
+          <div style="height:auto;"></div>
+        </td>
+        <td style="width: 3px;height:100%;">
+          <div style="width:100%;height: 100%;background:rebeccapurple;"></div>
+        </td>
+        <td style="text-align: top;">
+          <div>文件列表</div>
+          <!-- 这里同样无需高度百分比 -->
+          <div style="height:auto;"></div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+<script lang="javascript">
+  window.onload=function(){
+    var username = document.getElementById('username');
+    $.ajax({
+      url: "kuser/info",
+      type: "POST",
+      data:{"username":username.value},
+      // 由于textStatus本身已经包含了error信息，使用if语句无法正确过滤出错误类型
+      error: function(jqXHR, textStatus, errorThrown) { 
+        alert(textStatus + ": " +errorThrown); 
+      },
+      success:function(data, textStatus, jqXHR) {
+        document.getElementById("username").innerHTML=data.username; 
+        document.getElementById("regtime").innerHTML = data.regtime; 
+      }
+    });
+  }
+</script>
+
+
