@@ -52,3 +52,21 @@ func GetFileMeta(fileSha1 string) (*DBfilemeta, error) {
 	}
 	return &meta, nil
 }
+
+// 在文件转移到OSS上后  修改地址
+
+func UpdateFileLocation(filehash, location string) bool {
+
+	stmt, err := mysql.DBConn().Prepare("update tbl_file set file_addr=? where file_sha1=?")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	_, err = stmt.Exec(location, filehash)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	return true
+}

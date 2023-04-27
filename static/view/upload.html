@@ -94,18 +94,13 @@
           <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
         </a>
       </div>
-
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
-        <li><a href="#" class="nav-link px-2">Features</a></li>
-        <li><a href="#" class="nav-link px-2">Pricing</a></li>
-        <li><a href="#" class="nav-link px-2">FAQs</a></li>
-        <li><a href="#" class="nav-link px-2">About</a></li>
+        <li><a href="#" class="nav-link px-2 link-secondary">GoPan</a></li>
+        <li><a href="#" class="nav-link px-2" id="my-files-link">我的文件</a></li>
+        <li><a href="#" class="nav-link px-2">上传文件</a></li>
       </ul>
 
       <div class="col-md-3 text-end">
-        <button type="button" class="btn btn-outline-primary me-2">Login</button>
-        <button type="button" class="btn btn-primary">Sign-up</button>
       </div>
     </header>
   </div>
@@ -146,25 +141,32 @@
     resetForm(); //重置表单
   }
 
-  function onUploadFiles() {
-    const filesToUpload = file ? [file] : []; //只上传未被删除的文件
+function onUploadFiles() {
+  const filesToUpload = file ? [file] : []; //只上传未被删除的文件
 
-    if (filesToUpload.length === 0) { //如果未选择要上传的文件，则函数结束
-      return;
-    }
-
-    const xhr = new XMLHttpRequest(); //创建XMLHttpRequest对象，用于向服务器发送请求
-    xhr.open('POST', '/file/upload'); //设置请求类型和URL
-    xhr.onreadystatechange = function() { //当状态发生变化时执行的回调函数
-      if (xhr.readyState === 4 && xhr.status === 200) { //如果请求成功
-        alert('上传成功'); //弹窗提示用户上传成功
-        resetForm(); //重置表单（即将已选择文件、按钮以及只读文本框重置为初始状态）
-      }
-    };
-    const formData = new FormData(); //创建FormData对象，用于存储要上传的文件
-    filesToUpload.forEach(f => formData.append('file', f)); //将选中的文件添加到FormData对象中
-    xhr.send(formData); //发送请求
+  if (filesToUpload.length === 0) { //如果未选择要上传的文件，则函数结束
+    return;
   }
+  const xhr = new XMLHttpRequest(); //创建XMLHttpRequest对象，用于向服务器发送请求
+  xhr.open('POST', '/file/upload'); //设置请求类型和URL
+  xhr.onreadystatechange = function() { //当状态发生变化时执行的回调函数
+    if (xhr.readyState === 4 && xhr.status === 200) { //如果请求成功
+      alert('上传成功'); //弹窗提示用户上传成功
+      resetForm(); //重置表单（即将已选择文件、按钮以及只读文本框重置为初始状态）
+    }
+  };
+  const formData = new FormData(); //创建FormData对象，用于存储要上传的文件
+  filesToUpload.forEach(f => formData.append('file', f)); //将选中的文件添加到FormData对象中
+  
+  // 获取当前页面URL的query string 
+  const queryString = window.location.search;
+  // 匹配出其中的username参数值
+  const match = queryString.match(/[\?&]username=([^&]+)/);
+  // 如果有匹配到对应的参数，将其值添加到FormData对象中，以便提交给服务器
+  const username = match[1];
+  formData.append('username', username);
+  xhr.send(formData); //发送请求
+}
 
   function resetForm() {
     const selectedFileElement = document.querySelector('.file-input');
@@ -178,6 +180,17 @@
     uploadButton.style.display = 'none';
     selectedFileElement.querySelector('input[type=text]').value = '请选择文件';
   }
+window.onload = function() {
+  const queryString = window.location.search;
+  const match = queryString.match(/[\?&]username=([^&]+)/);
+  const username = match[1];
+  const myFilesLink = document.querySelector('#my-files-link');
+  
+  myFilesLink.addEventListener('click', function(event) {
+    event.preventDefault();
+    window.location.href = `/home?username=${username}`;
+  });
+}
 </script>
 </body>
 </html>

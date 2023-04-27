@@ -1,59 +1,122 @@
+
+<!DOCTYPE html>
 <html>
-<head>
-  <!-- 原来的双引号不一致，导致script标签无法正常引入库 -->
-  <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
-  <!-- 由于此处有多行字符串需要拼接，统一使用反斜杠进行换行，可以增加代码可读性 -->
-  <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg320mUcww7on3RYdg4Va+Pm\
-    <！---- 可选的 Bootstrap 主题文件 ---->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nDOJutInGasICJuC7uwjduW9SVrLvRYooPp2bWY\
-    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9m(" crossorigin="anonymous"></script>
-    <script lang="javascript">
-    </script>
-</head>
-<body style="width:100%;height:100%">
-  <div style="width:100%;height:100%;margin:0 0 10px 0;text-align: center;">
-    <div style="font-size:20px;font-weight:bold;margin:0;background: powderblue;height:32px;"> 文件云盘首页</div>
-    <table style="height:100%;width:100%;text-align: left;border-width: 2px; border-">
-      <!-- 由于此处的样式和布局都存在问题，重构了HTML代码 --> 
-      <tr style="margin-bottom: 20px;">
-        <td style="width:20%;height: 100%;background: lightsteelblue;">
-          <div style="text-align: top;height:20%;margin: 10px 0 0 10px;">
-            <img style="width:80px;height:80px;" src="/static/img/avatar.jpeg"> 用户名：<span id="username" style="color:green"></span><br> 注册时间：<span id="regtime" style="color:green"></span>
-          </div>
-          <!-- 这里不需要高度百分比 -->
-          <div style="height:auto;"></div>
-        </td>
-        <td style="width: 3px;height:100%;">
-          <div style="width:100%;height: 100%;background:rebeccapurple;"></div>
-        </td>
-        <td style="text-align: top;">
-          <div>文件列表</div>
-          <!-- 这里同样无需高度百分比 -->
-          <div style="height:auto;"></div>
-        </td>
-      </tr>
-    </table>
-  </div>
-</body>
-<script lang="javascript">
-  window.onload=function(){
-    var username = document.getElementById('username');
-    $.ajax({
-      url: "kuser/info",
-      type: "POST",
-      data:{"username":username.value},
-      // 由于textStatus本身已经包含了error信息，使用if语句无法正确过滤出错误类型
-      error: function(jqXHR, textStatus, errorThrown) { 
-        alert(textStatus + ": " +errorThrown); 
-      },
-      success:function(data, textStatus, jqXHR) {
-        document.getElementById("username").innerHTML=data.username; 
-        document.getElementById("regtime").innerHTML = data.regtime; 
+  <head>
+    <link rel="stylesheet" href="/accets/css/bootstrap.min.css">
+    <script src="/accets/js/bootstrap.min.js"></script>
+    <title>GoPan</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">GoPan</h1>
+      <table id="filetable" class="table table-striped table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th>文件名</th>
+            <th>修改日期</th>
+            <th>大小</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 这里使用 Go 的模板语言，遍历显示文件列表 -->
+          {{range .Files}}
+          <tr>
+            <td>{{.FileName}}</td>
+            <td>{{.UploadAt}}</td>
+            <td>{{.FileSize}}</td>
+            <td>
+              <button class="download-btn btn btn-success" data-sha1="{{.FileHash}}">下载</button>
+              <button class="delete-btn btn btn-danger" data-sha1="{{.FileHash}}">删除</button>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+      <!-- Pagination -->
+      <nav>
+        <ul id="pagination" class="pagination justify-content-end">
+          <!-- 上一页按钮 -->
+          <li id="prev-page" class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">上一页</a>
+          </li>
+          <!-- 分页按钮 -->
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <!-- 下一页按钮 -->
+          <li id="next-page" class="page-item">
+            <a class="page-link" href="#">下一页</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <script>
+      // 获取分页相关的 DOM 元素
+      const pagination = document.getElementById('pagination');
+      const prevPage = document.getElementById('prev-page');
+      const nextPage = document.getElementById('next-page');
+
+      // 获取文件列表的 tbody 元素和所有行元素
+      const tableBody = document.querySelector('#filetable tbody');
+      const tableRows = tableBody.querySelectorAll('tr');
+
+      // 计算总页数
+      const totalPage = Math.ceil(tableRows.length / 5);
+
+      // 初始化当前页码为 1
+      let currentPage = 1;
+
+      // 更新页面状态
+      function updatePageState() {
+        // 隐藏所有行元素
+        tableRows.forEach(row => row.style.display = 'none');
+
+        // 显示当前页码对应的行元素
+        const startIndex = (currentPage - 1) * 5;
+        const endIndex = startIndex + 5;
+        for (let i = startIndex; i < endIndex && i < tableRows.length; i++) {
+          tableRows[i].style.display = '';
+        }
+
+        // 更新分页按钮状态
+        if (currentPage === 1) {
+          prevPage.classList.add('disabled');
+        } else {
+          prevPage.classList.remove('disabled');
+        }
+
+        if (currentPage === totalPage) {
+          nextPage.classList.add('disabled');
+        } else {
+          nextPage.classList.remove('disabled');
+        }
+
+        // 更新分页按钮标签
+        const pageLinks = pagination.querySelectorAll('.page-link');
+        pageLinks.forEach((link, index) => link.textContent = index + 1);
       }
-    });
-  }
-</script>
 
+      // 初始化页面状态
+      updatePageState();
 
+      // 为分页按钮绑定事件处理函数
+      pagination.addEventListener('click', event => {
+        event.preventDefault();
+        const target = event.target;
+
+        if (target.tagName === 'A') {
+          if (target.parentElement === prevPage) {
+            currentPage--;
+          } else if (target.parentElement === nextPage) {
+            currentPage++;
+          } else {
+            currentPage = parseInt(target.textContent);
+          }
+
+          updatePageState();
+        }
+      });
+    </script>
+  </body>
+</html>

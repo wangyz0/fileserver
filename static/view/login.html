@@ -17,16 +17,16 @@
       </div>
 
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
-        <li><a href="#" class="nav-link px-2">Features</a></li>
-        <li><a href="#" class="nav-link px-2">Pricing</a></li>
-        <li><a href="#" class="nav-link px-2">FAQs</a></li>
-        <li><a href="#" class="nav-link px-2">About</a></li>
+        <li><a href="#" class="nav-link px-2 link-secondary">GoPan</a></li>
+        <li><a href="#" class="nav-link px-2">我的文件</a></li>
+        <li><a href="#" class="nav-link px-2">文件上传</a></li>
+        <!-- <li><a href="#" class="nav-link px-2">FAQs</a></li>
+        <li><a href="#" class="nav-link px-2">About</a></li> -->
       </ul>
 
       <div class="col-md-3 text-end">
-        <button type="button" class="btn btn-outline-primary me-2">Login</button>
-        <button type="button" class="btn btn-primary">Sign-up</button>
+        <button type="button" class="btn btn-outline-primary me-2">登录</button>
+        <button type="button" class="btn btn-primary" onclick="window.location.href='/sign'">注册</button>
       </div>
     </header>
   </div>
@@ -64,7 +64,25 @@
         </div>
 <main class="form-signin w-100 m-auto">
   <form method="POST" action="/login" style="width: 30%; margin: 0 auto;">
-    <img class="mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+<h1 class="text-center mt-5">
+  <div style="display: flex; justify-content: center;">
+    <span 
+      style="
+        display: inline-flex; 
+        width: 100px; 
+        height: 100px; 
+        background-color: #007bff; 
+        border-radius: 50%; 
+        text-align: center; 
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <span style="color: white; font-size: 28px; font-weight: bold;">GoPan</span>
+    </span>
+  </div>
+</h1>
+
     <h1 class="h3 mb-3 fw-normal">登录网盘</h1>
 
     <div class="form-floating">

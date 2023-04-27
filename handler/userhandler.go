@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fileserver/db"
 	"fileserver/util"
 	"fmt"
@@ -37,9 +38,23 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		email := r.Form.Get("email")
 		fmt.Println(username, password, phone, email)
 		if db.UserSignUp(username, password, phone, email) {
-			w.Write([]byte("注册成功"))
+			// 注册成功
+			fmt.Fprintf(w, `
+				<script>
+					alert("恭喜您，注册成功！");
+					window.location.href="/login";
+				</script>
+			`)
+
 		} else {
-			w.Write([]byte("注册失败"))
+			// 注册失败
+			fmt.Fprintf(w, `
+				<script>
+					alert("注册失败！请重新注册");
+					window.location.href="/sign";
+				</script>
+			`)
+
 		}
 
 	}
@@ -138,7 +153,7 @@ type HomePageData struct {
 	CapacityMax  string
 }
 
-func HomeHandeler(w http.ResponseWriter, r *http.Request) {
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		fmt.Println("获取username")
 		username := r.URL.Query().Get("username")
@@ -146,11 +161,22 @@ func HomeHandeler(w http.ResponseWriter, r *http.Request) {
 		user, err := db.GetUserInfo(username)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
 		}
-		data := map[string]string{
+
+		files, err := db.QueryUserFileMetas(username, 10)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		data := map[string]interface{}{
 			"Username": username,
 			"RegDate":  user.SignupAt[:10],
 			"Capacity": "20GB / 100GB",
+			"Files":    files,
 		}
 
 		t, err := template.ParseFiles("./static/view/home1.html")
@@ -166,7 +192,36 @@ func HomeHandeler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		return
+	} else if r.Method == "POST" {
+		fmt.Println("收到homePOST")
+		var deleteReq DeleteRequest
+		err := json.NewDecoder(r.Body).Decode(&deleteReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Access the username and sha1 values from the DeleteRequest struct
+		username := deleteReq.Username
+		status := deleteReq.Status
+		sha1 := deleteReq.Sha1
+		fmt.Printf("fileSha1: %v\n", sha1)
+		fmt.Println(username, status)
+		if status == 0 { //删除文件
+			db.DeleteUserFile(username, sha1)
+		} else if status == 1 { //下载文件
+			fmt.Println("进行下载")
+			http.Redirect(w, r, fmt.Sprintf("/download?filehash=%s", sha1), http.StatusFound)
+		}
+
 	}
 
-	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	// http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
+// 用来接受home发来的post的结构体
+type DeleteRequest struct {
+	Username string `json:"username"`
+	Sha1     string `json:"sha1"`
+	Status   int    `json:"status"`
 }

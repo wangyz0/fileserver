@@ -8,6 +8,7 @@ import (
 
 // 用户注册
 func UserSignUp(username string, password string, phone string, email string) bool {
+	fmt.Printf("username=%v\npassword=%v\nphone=%v\nemail=%v\n", username, password, phone, email)
 	stmt, err := mysql.DBConn().Prepare("insert ignore into tbl_user(`user_name`,`user_pwd`,`phone`,`email`)values(?,?,?,?)")
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
@@ -19,10 +20,14 @@ func UserSignUp(username string, password string, phone string, email string) bo
 		fmt.Printf("err: %v\n", err)
 		return false
 	}
-	if r, err := r.RowsAffected(); err == nil && r > 0 {
+	if i, err := r.RowsAffected(); err == nil && i > 0 {
 		return true
+	} else {
+		fmt.Printf("i: %v\n", i)
+		fmt.Printf("err: %v\n", err)
+		return false
 	}
-	return false
+
 }
 
 // 用户登录

@@ -1,0 +1,33 @@
+
+创建Ceph专用网络
+docker network create --driver bridge --subnet 172.20.0.0/16 ceph-network 
+docker network inspect ceph-network
+删除旧的Ceph相关容器
+docker rm -f $(docker ps -a | grep ceph | awk '{print $1}') 
+清理旧的Ceph相关目录文件，假如有的话
+rm -rf/www/ceph/var/lib/ceph//www/osd/ 
+创建相关目录及修改权限，用于挂载volume
+mkdir -p /www/ceph/var/lib/ceph/osd/www/osd/ 
+chown -R 64045:64045 /var/lib/ceph/osd/
+chown -R 64045:64045 /www/osd/ 
+创建monitor节点
+docker run -itd --name monnode --network ceph-network --ip 172.20.0.10 -e MON_NAME=monnode -e MON_IP=172.20.0.10 -v /www/ceph:/etc/ceph ceph/mon
+在monitor节点上标识3个OSD节点
+docker exec monnode ceph osd create 
+docker exec monnode ceph osd create
+docker exec monnode ceph osd create 
+创建OSD节点
+docker run -itd --name osdnodaθ --natwork ceph-network -e CLUSTER=ceph -e WEIGHT=1.0-e MON_NAME=monnode-e MON_ IP=172.20.0.10 -v /www/ceph:/etc/ceph-v/www/osd/0:/var/lib/ceph/osd/ceph-0 ceph/osd
+docker run -itd --name osdnode1 --network ceph-network -e CLUSTER=ceph-e WEIGHT=1.0-e MON_NAME=monnode-e MON_IP=172.20.0.10-v/www/ceph:/atc/ceph-v/www/osd/1:/var/lib/ceph/osd/caph-1 ceph/osd
+docker run -itd--name osdnode2 --network caph-network -e CLUSTER=ceph -e WEIGHT=1.0 -e MON_NAME=monnode-e MON_IP=172.20.0.10-v/www/ceph:/atc/ceph-v/www/osd/1:/var/lib/ceph/osd/caph-1 ceph/osd
+增加monitor节点，组件成集群
+docker run -itd --name monnode_1--network cepl-natwork --ip 172.20.0.11 -e MON NAME=monnode 1-e MON IP=172.20.0.11-v/www/ceph:etc/ceph ceph/mon
+docker run -itd --name monnode_2 --network ceph-network --ip 172.20.0.12 -e MON_NAME=monnode_2-e MON_IP=172.20.0.12-v/www/ceph:/etc/ceph ceph/mon
+创建gateway节点
+docker run -itd --name gwnode --network ceph-network --ip 172.20.0.9 -p 9080:80 -e RGW_NAME=gwnode -v/www/ceph:/etc/ceph ceph/radosgw
+查看Ceph集群状态
+sleep 10&& docker exec monnode ceph -s
+
+
+
+
